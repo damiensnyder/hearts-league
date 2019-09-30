@@ -21,13 +21,6 @@ GAME_COLUMNS = ["Season", "Game", "P1", "P2", "P3", "P4", "P1 Score", "P2 Score"
                 "P2 Tricks", "P3 Tricks", "P4 Tricks"]
 STANDINGS_COLUMNS = ["Season", "Game", "Name", "Author", "Games Played", "#1", "#2", "#3", "#4", "Points",
                      "Rounds Played", "Tricks Won", "Hearts", "Queens"]
-TRICK_COL_OLD = ["Game", "Round", "Trick", "P1", "P2", "P3", "P4", "P1 Card", "P2 Card", "P3 Card", "P4 Card", "Lead",
-                 "Winner"]
-GAME_COL_OLD = ["Game", "P1", "P2", "P3", "P4", "P1 Score", "P2 Score", "P3 Score", "P4 Score", "P1 Hearts",
-                "P2 Hearts", "P3 Hearts", "P4 Hearts", "P1 Queens", "P2 Queens", "P3 Queens", "P4 Queens", "P1 Tricks",
-                "P2 Tricks", "P3 Tricks", "P4 Tricks"]
-STANDINGS_COL_OLD = ["Author", "Name", "Games Played", "#1", "#2", "#3", "#4", "Points", "Rounds Played", "Tricks Won",
-                     "Hearts", "Queens"]
 
 # useful subgroups of column names
 SCORE_SUB = ["P1 Score", "P2 Score", "P3 Score", "P4 Score"]
@@ -35,15 +28,15 @@ TRICK_SUB = ["P1 Tricks", "P2 Tricks", "P3 Tricks", "P4 Tricks"]
 CARD_SUB = ["P1 Card", "P2 Card", "P3 Card", "P4 Card"]
 
 # filepaths
-BOT_PATH = "Rosters/Roster.csv"
-SCHEDULE_PATH = "Schedules/S80.csv"
+BOT_PATH = "Rosters/ExampleRoster.csv"
+SCHEDULE_PATH = "Schedules/ExampleSchedule.csv"
 TRICK_PATH = "Outputs/TrickHistory.csv"
 ROUND_PATH = "Outputs/RoundHistory.csv"
 GAME_PATH = "Outputs/GameHistory.csv"
 STANDINGS_PATH = "Outputs/Standings.csv"
 
 # season name
-SEASON = "Test Season"
+SEASON = "Example Season"
 
 
 # FUNCTIONS
