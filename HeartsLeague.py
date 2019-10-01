@@ -28,32 +28,35 @@ TRICK_SUB = ["P1 Tricks", "P2 Tricks", "P3 Tricks", "P4 Tricks"]
 CARD_SUB = ["P1 Card", "P2 Card", "P3 Card", "P4 Card"]
 
 # filepaths
-BOT_PATH = "Rosters/ExampleRoster.csv"
-SCHEDULE_PATH = "Schedules/ExampleSchedule.csv"
+BOT_PATH = "Rosters/Main.csv"
+SCHEDULE_PATH = "Schedules/Main.csv"
 TRICK_PATH = "Outputs/TrickHistory.csv"
 ROUND_PATH = "Outputs/RoundHistory.csv"
 GAME_PATH = "Outputs/GameHistory.csv"
 STANDINGS_PATH = "Outputs/Standings.csv"
 
 # season name
-SEASON = "Example Season"
+SEASON = "Test Season"
 
 
 # FUNCTIONS
 
 
+# gets the slough of the bot with the given name and the current game state
 def getBotSlough(botName, gameState):
     globals()[botName] = import_module("Bots." + botName)
     move = globals()[botName].getSlough(gameState)
     return move
 
 
+# gets the play of the bot with the given name and the current game state
 def getBotPlay(botName, gameState):
     globals()[botName] = import_module("Bots." + botName)
     move = globals()[botName].getPlay(gameState)
     return move
 
 
+# just tells everything else what to do
 def runLeague():
     botList = pd.read_csv(BOT_PATH)
     schedule = pd.read_csv(SCHEDULE_PATH, header=None).values.tolist()
@@ -78,8 +81,10 @@ class League:
         self.standings = []
         self.gameNumber = 0
 
+    # simulates all the games
     def playGames(self):
 
+        # for each game in the schedule:
         for playerIndices in self.schedule:
             self.gameNumber += 1
 
@@ -105,12 +110,13 @@ class League:
         self.gameNumber += 1
         self.updateStandings()
 
+    # adds the standings after each game to the standings DF
     def updateStandings(self):
 
         # for each player:
         for playerIndex in range(len(self.pathList)):
 
-            # make some dummies
+            # make some counters
             author = self.authorList[playerIndex]
             name = self.nameList[playerIndex]
             gamesPlayed = 0
@@ -124,6 +130,7 @@ class League:
             hearts = 0
             queens = 0
 
+            # for each game so far:
             for gameNumber in range(self.gameNumber - 1):
                 gameRow = self.gameHistory[gameNumber]
 
@@ -177,12 +184,14 @@ class League:
                     numBetter = 0
                     numWorse = 0
 
+                    # count how many players performed better and worse
                     for colName in SCORE_SUB:
                         if gameRow[colName] < score:
                             numBetter += 1
                         elif gameRow[colName] > score:
                             numWorse += 1
 
+                    # deals with ties in the placement
                     if (numBetter == 0) & (numWorse == 1):
                         num1 += 4
                         num2 += 4
@@ -220,16 +229,17 @@ class League:
                                                hearts, queens]))
             self.standings.append(row)
 
+    # outputs everything to CSV
     def writeToCsv(self, trickPath, roundPath, gamePath, standingsPath):
         trickHistoryDF = pd.DataFrame.from_dict(self.trickHistory)
         roundHistoryDF = pd.DataFrame.from_dict(self.roundHistory)
         gameHistoryDF = pd.DataFrame.from_dict(self.gameHistory)
         standingsDF = pd.DataFrame.from_dict(self.standings)
 
-        trickHistoryDF.to_csv(trickPath)
-        roundHistoryDF.to_csv(roundPath)
-        gameHistoryDF.to_csv(gamePath)
-        standingsDF.to_csv(standingsPath)
+        trickHistoryDF.to_csv(trickPath, index=False, header=False)
+        roundHistoryDF.to_csv(roundPath, index=False, header=False)
+        gameHistoryDF.to_csv(gamePath, index=False, header=False)
+        standingsDF.to_csv(standingsPath, index=False, header=False)
 
 
 class Game:
@@ -252,6 +262,7 @@ class Game:
         self.roundHistory = []
         self.roundNumber = 1
 
+    # gets the current game state from the perspective of a given player
     def getGameState(self, player, isSlough):
         hand = self.deck[player]
         sloughedByYou = self.sloughQueue[player]
@@ -259,10 +270,11 @@ class Game:
         sloughedToYou = None
         if not isSlough:
             sloughedToYou = self.sloughQueue[passedFrom]
-        gameState = GameState(hand, self.legalMoves, sloughedByYou, sloughedToYou, player, self.sloughDirection,
+        gameState = GameState(hand, self.legalMoves, self.lead, sloughedByYou, sloughedToYou, player, self.sloughDirection,
                               self.playHistory, self.roundPoints, self.gamePoints)
         return gameState
 
+    # runs rounds until the game ends
     def simGame(self):
         while not self.gameOver:
             self.dealCards()
@@ -270,6 +282,7 @@ class Game:
             self.simPlay()
             self.endRound()
 
+    # shuffles and deals the deck
     def dealCards(self):
         undealtDeck = list(range(0, 52))
         random.shuffle(undealtDeck)
@@ -277,8 +290,10 @@ class Game:
         for player in range(4):
             self.deck.append(undealtDeck[player * 13:(player + 1) * 13])
 
+    # sims the sloughing phase of the game
     def simSlough(self):
-        # reset some stuff
+
+        # reset some stuff at the beginning of each round
         self.roundPoints = [0] * 4
         self.sloughQueue = [[] for _ in range(4)]
 
@@ -303,6 +318,7 @@ class Game:
             for i in range(3):
                 self.deck[sloughTo].append(self.sloughQueue[player][i])
 
+    # receives a player's move and updates the game state accordingly
     def sloughCard(self, move, player):
         numCards = len(self.legalMoves)
 
@@ -316,6 +332,7 @@ class Game:
         self.sloughQueue[player].append(card)
         del self.deck[player][handIndex]
 
+    # simulates the play section of the game
     def simPlay(self):
         # reset playHistory
         self.playHistory = [[] for _ in range(4)]
@@ -343,6 +360,7 @@ class Game:
                                            self.playHistory[2][trick], self.playHistory[3][trick], oldLead, self.lead]))
             self.trickHistory.append(row)
 
+    # receives a player's play and updates the game state accordingly
     def playCard(self, move, player):
         numCards = len(self.legalMoves)
 
@@ -357,6 +375,7 @@ class Game:
         self.playHistory[player].append(card)
         del self.deck[player][handIndex]
 
+    # finds the legal moves for the given player and adds them to the game state
     def setLegalMoves(self, player, isSlough):
         hand = self.deck[player]
         legalMoves = []
@@ -438,6 +457,7 @@ class Game:
 
         self.legalMoves = legalMoves
 
+    # figure out who won the trick and make them lead the next one
     def setNewLead(self):
         trick = len(self.playHistory[0]) - 1
         winningCard = self.playHistory[self.lead][trick]
@@ -460,8 +480,10 @@ class Game:
             elif self.playHistory[i][trick] > 38:
                 self.roundPoints[self.lead] += 1
 
+    # do behavior that needs to happen at the end of each round
     def endRound(self):
-        # check if anyone shot the moon and assign gamePoints
+
+        # check if anyone shot the moon and add the points everyone got to gamePoints
         if self.roundPoints[0] == 26:
             self.roundPoints = [0, 26, 26, 26]
         elif self.roundPoints[1] == 26:
@@ -476,6 +498,7 @@ class Game:
         self.gamePoints[2] += self.roundPoints[2]
         self.gamePoints[3] += self.roundPoints[3]
 
+        # add it to the round history
         roundRow = dict(zip(ROUND_COLUMNS, [self.season, self.gameNumber, self.roundNumber, self.roundPoints[0],
                                             self.roundPoints[1], self.roundPoints[2], self.roundPoints[3],
                                             self.lastQueen]))
@@ -490,9 +513,10 @@ class Game:
         self.roundNumber += 1
         self.sloughDirection = (self.sloughDirection + 1) % 3 + 1
 
+    # gets thea row containing the basic info about the game
     def getGameHistory(self):
 
-        # some dummies
+        # some counters
         hearts = [0] * 4
         queens = [0] * 4
         tricks = [0] * 4
@@ -520,10 +544,11 @@ class Game:
 
 
 class GameState:
-    def __init__(self, hand, legalMoves, sloughedByYou, sloughedToYou, whichPlayer, sloughDirection, playHistory,
+    def __init__(self, hand, legalMoves, lead, sloughedByYou, sloughedToYou, whichPlayer, sloughDirection, playHistory,
                  roundPoints, gamePoints):
         self.hand = hand
         self.legalMoves = legalMoves
+        self.lead = lead
         self.playHistory = playHistory
         self.roundPoints = roundPoints
         self.gamePoints = gamePoints
