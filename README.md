@@ -14,6 +14,8 @@ A bot must be a Python file with two functions: `getPlay(gameState)` and `getSlo
 
 `legalMoves` - The cards in your hand that you can legally play at that point. (Same format.)
 
+`lead` - An integer representing the player who led or leads this trick. Player 1 is 0, Player 2 is 1, and so on.
+
 `playHistory` - The cards that have been played (not including sloughed cards) so far this game. This is formatted as a list of lists of cards. Player 1 is the first sublist, Player 2 the second, and so on. Each sublist is only as long as the number of cards that player has played. An example list would be:
 
 ```
@@ -27,7 +29,7 @@ A bot must be a Python file with two functions: `getPlay(gameState)` and `getSlo
 
 `gamePoints` - The number of points each player has taken so far this game. (Same format.) This list is not updated until the end of each round.
 
-`whichPlayer` - An integer representing your place in the order. Player 1 is 0, Player 2 is 1, and so on.
+`whichPlayer` - Your place in the turn order. (Same format as `lead`.)
 
 `sloughDirection` - An integer representing which direction cards are passed this round. 1 is to the player immediately after you in the order, 2 is to the player across from you, and 3 is to the player immediately before you.
 
