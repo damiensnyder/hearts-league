@@ -39,7 +39,7 @@ across; then after that it repeats.
 See the [about tab](https://hearts.damiensnyder.com/) for an explanation of the league rules.
 
 ## Bot format
-A bot must be a Python file with two functions: `getPlay(gameState)` and `getSlough(gameState)`. The `gameState` parameter receives a `GameState` class with the following fields:
+A bot must be a Python file with two functions: `getPlay(gameState)` and `getSluff(gameState)`. The `gameState` parameter receives a `GameState` class with the following fields:
 
 `hand` - A Python list of the cards currently in your hand. Cards are represented by a number from 0 to 51. The clubs are 0-12 (with the 2 being 0 and the ace being 12), diamonds are 13-25, spades are 26-38, and hearts are 39-51. An example hand would be `[25, 14, 6, 19]`, containing the ace of diamonds, 3 of diamonds, 8 of clubs, and 8 of diamonds.
 
@@ -47,7 +47,7 @@ A bot must be a Python file with two functions: `getPlay(gameState)` and `getSlo
 
 `lead` - An integer representing the player who led or leads this trick. Player 1 is 0, Player 2 is 1, and so on.
 
-`playHistory` - The cards that have been played (not including sloughed cards) so far this game. This is formatted as a list of lists of cards. Player 1 is the first sublist, Player 2 the second, and so on. Each sublist is only as long as the number of cards that player has played. An example list would be:
+`playHistory` - The cards that have been played (not including sluffed cards) so far this game. This is formatted as a list of lists of cards. Player 1 is the first sublist, Player 2 the second, and so on. Each sublist is only as long as the number of cards that player has played. An example list would be:
 
 ```
 [[10],
@@ -62,11 +62,11 @@ A bot must be a Python file with two functions: `getPlay(gameState)` and `getSlo
 
 `whichPlayer` - Your place in the turn order. (Same format as `lead`.)
 
-`sloughDirection` - An integer representing which direction cards are passed this round. 1 is to the player immediately after you in the order, 2 is to the player across from you, and 3 is to the player immediately before you.
+`sluffDirection` - An integer representing which direction cards are passed this round. 1 is to the player immediately after you in the order, 2 is to the player across from you, and 3 is to the player immediately before you.
 
-`sloughedByYou` - A list containing the cards you have sloughed so far this game.
+`sluffedByYou` - A list containing the cards you have sluffed so far this game.
 
-`sloughedToYou` - A list containing the cards that were sloughed to you so far this game. This list is not updated until after all cards have been sloughed.
+`sluffedToYou` - A list containing the cards that were sluffed to you so far this game. This list is not updated until after all cards have been sluffed.
 
 Both functions must return the index of the card in `legalMoves` that you intend to play. If `legalMoves` is `[5, 4, 11]` and you wish to play the 6 of clubs, you would return 1. If an index not in `legalMoves` is returned, a random legal move will be selected instead.
 
