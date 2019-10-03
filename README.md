@@ -2,7 +2,38 @@
 If you're here, hopefully it's because you want to create a bot for [Hearts League](https://hearts.damiensnyder.com/). Here's how to do that.
 
 ## How Hearts works
-[Here](http://mark.random-article.com/hearts/intro.html) is a guide on how to play Hearts. (The only difference is that the "holding hand" is skipped here.)
+Hearts is a four-player card game. At the start of the game, each
+player is dealt 13 cards. They choose 3 cards they don't want and
+pass (or "slough") them to the player to their left. Once every player
+has received the cards passed to them, the player with the 2 of clubs
+plays it. The person to their left must play a card of the same suit,
+if they have one. If not, they may play any card. Once each player has
+played a card, the player who played the greatest card that matched
+the suit of the first card (in this case, the highest club) wins the
+trick. They then choose a card from their hand to start the next
+trick, which follows the same pattern. Players keep playing tricks
+until they run out of cards. The players then count cards in the
+tricks they won: hearts are worth 1 point each, and the queen of
+spades is worth 13. Those points are added to their total score, and
+the cards are redealt for the start of another round. Rounds are
+played until one player has accumulated 100 points, at which point
+the player with the fewest points wins.
+
+There are some corner cases to consider. On the first trick, if a
+player does not have any clubs to match the 2 of clubs, they may not
+play a penalty card (a heart or the queen of spades) unless they do
+not have any other cards, which is extremely unlikely. When a player
+wins a trick, they may not lead the next trick with a heart if a
+penalty card has not been played yet, unless their hand only contains
+penalty cards. At the end of the round, if one player took all 26
+points, instead no points are added to that player's score and 26
+points are added to each other player's score. This is known as
+"shooting the moon". The direction in which cards are sloughed
+changes after every round. In the first round, cards are sloughed to
+the left; in the next, they are sloughed to the right; next,
+across; then after that it repeats.
+
+[Here](http://mark.random-article.com/hearts/) is a guide to some strategies.
 
 ## How the league works
 See the [about tab](https://hearts.damiensnyder.com/) for an explanation of the league rules.
