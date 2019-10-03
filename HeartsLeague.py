@@ -42,10 +42,10 @@ SEASON = "Test Season"
 # FUNCTIONS
 
 
-# gets the slough of the bot with the given name and the current game state
-def getBotSlough(botName, gameState):
+# gets the sluff of the bot with the given name and the current game state
+def getBotSluff(botName, gameState):
     globals()[botName] = import_module("Bots." + botName)
-    move = globals()[botName].getSlough(gameState)
+    move = globals()[botName].getSluff(gameState)
     return move
 
 
@@ -250,10 +250,10 @@ class Game:
         self.gameNumber = gameNumber
         self.roundPoints = None
         self.gamePoints = [0] * 4
-        self.sloughDirection = 1
+        self.sluffDirection = 1
         self.gameOver = False
         self.deck = None
-        self.sloughQueue = None
+        self.sluffQueue = None
         self.lead = None
         self.legalMoves = None
         self.playHistory = None
@@ -263,14 +263,14 @@ class Game:
         self.roundNumber = 1
 
     # gets the current game state from the perspective of a given player
-    def getGameState(self, player, isSlough):
+    def getGameState(self, player, isSluff):
         hand = self.deck[player]
-        sloughedByYou = self.sloughQueue[player]
-        passedFrom = (player - self.sloughDirection) % 4
-        sloughedToYou = None
-        if not isSlough:
-            sloughedToYou = self.sloughQueue[passedFrom]
-        gameState = GameState(hand, self.legalMoves, self.lead, sloughedByYou, sloughedToYou, player, self.sloughDirection,
+        sluffedByYou = self.sluffQueue[player]
+        passedFrom = (player - self.sluffDirection) % 4
+        sluffedToYou = None
+        if not isSluff:
+            sluffedToYou = self.sluffQueue[passedFrom]
+        gameState = GameState(hand, self.legalMoves, self.lead, sluffedByYou, sluffedToYou, player, self.sluffDirection,
                               self.playHistory, self.roundPoints, self.gamePoints)
         return gameState
 
@@ -278,7 +278,7 @@ class Game:
     def simGame(self):
         while not self.gameOver:
             self.dealCards()
-            self.simSlough()
+            self.simSluff()
             self.simPlay()
             self.endRound()
 
@@ -290,36 +290,36 @@ class Game:
         for player in range(4):
             self.deck.append(undealtDeck[player * 13:(player + 1) * 13])
 
-    # sims the sloughing phase of the game
-    def simSlough(self):
+    # sims the sluffing phase of the game
+    def simSluff(self):
 
         # reset some stuff at the beginning of each round
         self.roundPoints = [0] * 4
-        self.sloughQueue = [[] for _ in range(4)]
+        self.sluffQueue = [[] for _ in range(4)]
 
         # get and play the bots' moves
         for trick in range(3):
             for player in range(4):
                 self.setLegalMoves(player, True)
-                move = getBotSlough(self.players[player], self.getGameState(player, True))
-                self.sloughCard(move, player)
+                move = getBotSluff(self.players[player], self.getGameState(player, True))
+                self.sluffCard(move, player)
 
             # update trickHistory
             row = dict(zip(TRICK_COLUMNS, [self.season, self.gameNumber, self.roundNumber, trick - 3,
-                                           self.sloughQueue[0][trick], self.sloughQueue[1][trick],
-                                           self.sloughQueue[2][trick],
-                                           self.sloughQueue[3][trick], -1, -1]))
+                                           self.sluffQueue[0][trick], self.sluffQueue[1][trick],
+                                           self.sluffQueue[2][trick],
+                                           self.sluffQueue[3][trick], -1, -1]))
             self.trickHistory.append(row)
 
         # transfer cards to the correct players
         for player in range(4):
-            sloughTo = (player + self.sloughDirection) % 4
+            sluffTo = (player + self.sluffDirection) % 4
 
             for i in range(3):
-                self.deck[sloughTo].append(self.sloughQueue[player][i])
+                self.deck[sluffTo].append(self.sluffQueue[player][i])
 
     # receives a player's move and updates the game state accordingly
-    def sloughCard(self, move, player):
+    def sluffCard(self, move, player):
         numCards = len(self.legalMoves)
 
         # replace invalid move index with random move
@@ -329,7 +329,7 @@ class Game:
         card = self.legalMoves[move]
         handIndex = self.deck[player].index(card)
 
-        self.sloughQueue[player].append(card)
+        self.sluffQueue[player].append(card)
         del self.deck[player][handIndex]
 
     # simulates the play section of the game
@@ -376,15 +376,15 @@ class Game:
         del self.deck[player][handIndex]
 
     # finds the legal moves for the given player and adds them to the game state
-    def setLegalMoves(self, player, isSlough):
+    def setLegalMoves(self, player, isSluff):
         hand = self.deck[player]
         legalMoves = []
 
         # for each card:
         for card in hand:
 
-            # if it's a slough
-            if isSlough:
+            # if it's a sluff
+            if isSluff:
                 legalMoves.append(card)
 
             # if it's the lead player
@@ -511,7 +511,7 @@ class Game:
                 self.gameOver = True
 
         self.roundNumber += 1
-        self.sloughDirection = (self.sloughDirection + 1) % 3 + 1
+        self.sluffDirection = (self.sluffDirection + 1) % 3 + 1
 
     # gets thea row containing the basic info about the game
     def getGameHistory(self):
@@ -544,7 +544,7 @@ class Game:
 
 
 class GameState:
-    def __init__(self, hand, legalMoves, lead, sloughedByYou, sloughedToYou, whichPlayer, sloughDirection, playHistory,
+    def __init__(self, hand, legalMoves, lead, sluffedByYou, sluffedToYou, whichPlayer, sluffDirection, playHistory,
                  roundPoints, gamePoints):
         self.hand = hand
         self.legalMoves = legalMoves
@@ -553,9 +553,9 @@ class GameState:
         self.roundPoints = roundPoints
         self.gamePoints = gamePoints
         self.whichPlayer = whichPlayer
-        self.sloughDirection = sloughDirection
-        self.sloughedByYou = sloughedByYou
-        self.sloughedToYou = sloughedToYou
+        self.sluffDirection = sluffDirection
+        self.sluffedByYou = sluffedByYou
+        self.sluffedToYou = sluffedToYou
 
 
 # ACTUAL STUFF
