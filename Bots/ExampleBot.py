@@ -8,5 +8,5 @@ def getPlay(gameState):
     return 0
 
 
-def getSlough(gameState):
+def getSluff(gameState):
     return 0
