@@ -4,7 +4,7 @@ If you're here, hopefully it's because you want to create a bot for [Hearts Leag
 ## How Hearts works
 Hearts is a four-player card game. At the start of the game, each
 player is dealt 13 cards. They choose 3 cards they don't want and
-pass (or "slough") them to the player to their left. Once every player
+pass (or "sluff") them to the player to their left. Once every player
 has received the cards passed to them, the player with the 2 of clubs
 plays it. The person to their left must play a card of the same suit,
 if they have one. If not, they may play any card. Once each player has
@@ -28,9 +28,9 @@ penalty card has not been played yet, unless their hand only contains
 penalty cards. At the end of the round, if one player took all 26
 points, instead no points are added to that player's score and 26
 points are added to each other player's score. This is known as
-"shooting the moon". The direction in which cards are sloughed
-changes after every round. In the first round, cards are sloughed to
-the left; in the next, they are sloughed to the right; next,
+"shooting the moon". The direction in which cards are sluffed
+changes after every round. In the first round, cards are sluffed to
+the left; in the next, they are sluffed to the right; next,
 across; then after that it repeats.
 
 [Here](http://mark.random-article.com/hearts/) is a guide to some strategies.
