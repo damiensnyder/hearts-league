@@ -72,7 +72,7 @@ Both functions must return the index of the card in `legalMoves` that you intend
 
 ## Other rules
 
-You may not import any modules other than numpy, pandas, math, and random. A season has hundreds of thousands of moves, so each move should take no longer than about 20 milliseconds to allow for quick simulation.
+You may not import any modules other than numpy, pandas, math, and random. A season has hundreds of thousands of moves, so each move should take no longer than about 30 milliseconds to allow for quick simulation.
 
 ## Testing
 
