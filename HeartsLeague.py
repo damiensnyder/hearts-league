@@ -35,34 +35,53 @@ ROUND_PATH = "Outputs/RoundHistory.csv"
 GAME_PATH = "Outputs/GameHistory.csv"
 STANDINGS_PATH = "Outputs/Standings.csv"
 
-# season name
+# season name to be printed in the CSVs
 SEASON = "Test Season"
 
 
 # FUNCTIONS
 
 
-# gets the sluff of the bot with the given name and the current game state
 def getBotSluff(botName, gameState):
+    """Gets the sluff of the bot with the given name given the current game state."""
     globals()[botName] = import_module("Bots." + botName)
     move = globals()[botName].getSluff(gameState)
     return move
 
 
-# gets the play of the bot with the given name and the current game state
 def getBotPlay(botName, gameState):
+    """Gets the play of the bot with the given name given the current game state."""
     globals()[botName] = import_module("Bots." + botName)
     move = globals()[botName].getPlay(gameState)
     return move
 
 
-# just tells everything else what to do
 def runLeague():
+    """Gets the botList and schedule, then creates a league and tells it to do stuff."""
     botList = pd.read_csv(BOT_PATH)
     schedule = pd.read_csv(SCHEDULE_PATH, header=None).values.tolist()
     league = League(SEASON, botList, schedule)
     league.playGames()
     league.writeToCsv(TRICK_PATH, ROUND_PATH, GAME_PATH, STANDINGS_PATH)
+
+
+def suit(card):
+    """Gets the suit of a given card.
+    0 = clubs, 1 = diamonds, 2 = spades, 3 = hearts
+    """
+    return (card - (card % 13)) / 13
+
+
+def value(card):
+    """Gets the value of a given card.
+    0 = 2, 1 = 3, 2 = 4, 3 = 5, 4 = 6, 5 = 7, 6 = 8, 7 = 9, 8 = 10, 9 = jack, 10 = queen, 11 = king, 12 = ace
+    """
+    return card % 13
+
+
+def isPenalty(card):
+    """Returns true if the given card is a heart or the queen of spades."""
+    return (card >= 39) | (card == 36)
 
 
 # CLASSES
@@ -81,8 +100,8 @@ class League:
         self.standings = []
         self.gameNumber = 0
 
-    # simulates all the games
     def playGames(self):
+        """Simulates all the games."""
 
         # for each game in the schedule:
         for playerIndices in self.schedule:
@@ -110,8 +129,8 @@ class League:
         self.gameNumber += 1
         self.updateStandings()
 
-    # adds the standings after each game to the standings DF
     def updateStandings(self):
+        """Adds the standings to the standings DF after each game."""
 
         # for each player:
         for playerIndex in range(len(self.pathList)):
@@ -229,8 +248,8 @@ class League:
                                                hearts, queens]))
             self.standings.append(row)
 
-    # outputs everything to CSV
     def writeToCsv(self, trickPath, roundPath, gamePath, standingsPath):
+        """"Writes everything to CSV files."""
         trickHistoryDF = pd.DataFrame.from_dict(self.trickHistory)
         roundHistoryDF = pd.DataFrame.from_dict(self.roundHistory)
         gameHistoryDF = pd.DataFrame.from_dict(self.gameHistory)
@@ -262,8 +281,8 @@ class Game:
         self.roundHistory = []
         self.roundNumber = 1
 
-    # gets the current game state from the perspective of a given player
     def getGameState(self, player, isSluff):
+        """Returns the current game state from the perspective of a given player."""
         hand = self.deck[player]
         sluffedByYou = self.sluffQueue[player]
         passedFrom = (player - self.sluffDirection) % 4
@@ -274,24 +293,24 @@ class Game:
                               self.playHistory, self.roundPoints, self.gamePoints)
         return gameState
 
-    # runs rounds until the game ends
     def simGame(self):
+        """Runs rounds until the game ends"""
         while not self.gameOver:
             self.dealCards()
             self.simSluff()
             self.simPlay()
             self.endRound()
 
-    # shuffles and deals the deck
     def dealCards(self):
+        """Shuffles and deals the deck. Returns the deck as a list of 4 lists of 13 integers."""
         undealtDeck = list(range(0, 52))
         random.shuffle(undealtDeck)
         self.deck = []
         for player in range(4):
             self.deck.append(undealtDeck[player * 13:(player + 1) * 13])
 
-    # sims the sluffing phase of the game
     def simSluff(self):
+        """Simulates the sluffing phase of the game."""
 
         # reset some stuff at the beginning of each round
         self.roundPoints = [0] * 4
@@ -302,7 +321,7 @@ class Game:
             for player in range(4):
                 self.setLegalMoves(player, True)
                 move = getBotSluff(self.players[player], self.getGameState(player, True))
-                self.sluffCard(move, player)
+                self.playSluff(move, player)
 
             # update trickHistory
             row = dict(zip(TRICK_COLUMNS, [self.season, self.gameNumber, self.roundNumber, trick - 3,
@@ -318,8 +337,10 @@ class Game:
             for i in range(3):
                 self.deck[sluffTo].append(self.sluffQueue[player][i])
 
-    # receives a player's move and updates the game state accordingly
-    def sluffCard(self, move, player):
+    def playSluff(self, move, player):
+        """Receives a player's sluff and updates the game state accordingly.
+        Replaces illegal moves with random moves.
+        """
         numCards = len(self.legalMoves)
 
         # replace invalid move index with random move
@@ -332,8 +353,9 @@ class Game:
         self.sluffQueue[player].append(card)
         del self.deck[player][handIndex]
 
-    # simulates the play section of the game
     def simPlay(self):
+        """Simulates the play phase of the game."""
+
         # reset playHistory
         self.playHistory = [[] for _ in range(4)]
 
@@ -360,8 +382,10 @@ class Game:
                                            self.playHistory[2][trick], self.playHistory[3][trick], oldLead, self.lead]))
             self.trickHistory.append(row)
 
-    # receives a player's play and updates the game state accordingly
     def playCard(self, move, player):
+        """Receives a player's play and updates the game state accordingly.
+        Replaces illegal moves with random moves.
+        """
         numCards = len(self.legalMoves)
 
         # replace invalid move index with random move
@@ -375,8 +399,8 @@ class Game:
         self.playHistory[player].append(card)
         del self.deck[player][handIndex]
 
-    # finds the legal moves for the given player and adds them to the game state
     def setLegalMoves(self, player, isSluff):
+        """Sets legalMoves to the list of legal moves for the given player."""
         hand = self.deck[player]
         legalMoves = []
 
@@ -407,7 +431,7 @@ class Game:
                         penaltyPlayed = False
                         for playerHistory in self.playHistory:
                             for playedCard in playerHistory:
-                                if (playedCard == 36) | (playedCard >= 39):
+                                if isPenalty(playedCard):
                                     penaltyPlayed = True
 
                         # if a penalty has been played:
@@ -420,7 +444,7 @@ class Game:
                             # check if the hand is only penalties
                             onlyPenalties = True
                             for handCard in hand:
-                                if (handCard != 36) & (handCard < 39):
+                                if not isPenalty(handCard):
                                     onlyPenalties = False
 
                             # if the hand is only penalties:
@@ -435,10 +459,10 @@ class Game:
             else:
 
                 # get the lead suit
-                leadSuit = math.floor(self.playHistory[self.lead][-1] / 13)
+                leadSuit = suit(self.playHistory[self.lead][-1])
 
                 # if it's the same suit
-                if math.floor(card / 13) == leadSuit:
+                if suit(card) == leadSuit:
                     legalMoves.append(card)
 
                 # if it's not the same suit
@@ -447,7 +471,7 @@ class Game:
                     # check if that suit is in the hand
                     suitPresent = False
                     for handCard in hand:
-                        if math.floor(handCard / 13) == leadSuit:
+                        if suit(handCard) == leadSuit:
                             suitPresent = True
 
                     # if that suit is not in the hand
@@ -457,8 +481,8 @@ class Game:
 
         self.legalMoves = legalMoves
 
-    # figure out who won the trick and make them lead the next one
     def setNewLead(self):
+        """Figure out who won the trick and make them lead the next one"""
         trick = len(self.playHistory[0]) - 1
         winningCard = self.playHistory[self.lead][trick]
 
@@ -467,7 +491,7 @@ class Game:
             playerCard = self.playHistory[player][trick]
 
             # if it is the same suit but greater:
-            if (math.floor(playerCard / 13) == math.floor(winningCard / 13)) & (playerCard > winningCard):
+            if (suit(playerCard) == suit(winningCard)) & (playerCard > winningCard):
                 # set the new lead and winningCard
                 self.lead = player
                 winningCard = playerCard
@@ -480,8 +504,10 @@ class Game:
             elif self.playHistory[i][trick] > 38:
                 self.roundPoints[self.lead] += 1
 
-    # do behavior that needs to happen at the end of each round
     def endRound(self):
+        """At the end of each round, chek if anyone shot the moon, increment gamePoints, append the round to the list of
+        round rows, then end the game if anyone has 100 points or more.
+        """
 
         # check if anyone shot the moon and add the points everyone got to gamePoints
         if self.roundPoints[0] == 26:
@@ -513,8 +539,8 @@ class Game:
         self.roundNumber += 1
         self.sluffDirection = (self.sluffDirection + 1) % 3 + 1
 
-    # gets thea row containing the basic info about the game
     def getGameHistory(self):
+        """Returns a dict containing the basic info and stats about the game."""
 
         # some counters
         hearts = [0] * 4
