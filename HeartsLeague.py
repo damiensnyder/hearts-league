@@ -7,7 +7,6 @@
 from importlib import import_module
 import random
 import pandas as pd
-import math
 
 
 # CONSTANTS
@@ -35,8 +34,11 @@ ROUND_PATH = "Outputs/RoundHistory.csv"
 GAME_PATH = "Outputs/GameHistory.csv"
 STANDINGS_PATH = "Outputs/Standings.csv"
 
-# season name to be printed in the CSVs
-SEASON = "Test Season"
+# season name to be printed in the CSV files
+SEASON_NAME = "Test Season"
+
+# number of points at which someone loses the game
+NUM_TO_LOSE = 100
 
 
 # FUNCTIONS
@@ -60,7 +62,7 @@ def runLeague():
     """Gets the botList and schedule, then creates a league and tells it to do stuff."""
     botList = pd.read_csv(BOT_PATH)
     schedule = pd.read_csv(SCHEDULE_PATH, header=None).values.tolist()
-    league = League(SEASON, botList, schedule)
+    league = League(SEASON_NAME, botList, schedule)
     league.playGames()
     league.writeToCsv(TRICK_PATH, ROUND_PATH, GAME_PATH, STANDINGS_PATH)
 
@@ -506,7 +508,7 @@ class Game:
 
     def endRound(self):
         """At the end of each round, chek if anyone shot the moon, increment gamePoints, append the round to the list of
-        round rows, then end the game if anyone has 100 points or more.
+        round rows, then end the game if anyone has hit the number of points required to lose (by default 100).
         """
 
         # check if anyone shot the moon and add the points everyone got to gamePoints
@@ -533,7 +535,7 @@ class Game:
 
         # check if game over
         for player in range(4):
-            if self.gamePoints[player] >= 100:
+            if self.gamePoints[player] >= NUM_TO_LOSE:
                 self.gameOver = True
 
         self.roundNumber += 1
